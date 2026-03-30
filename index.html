@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gerador de Assinatura SMC</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f9;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .container {
+            background: #fff;
+            padding: 20px 30px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            max-width: 600px;
+            width: 100%;
+            margin-bottom: 20px;
+        }
+        h2 { margin-top: 0; color: #333; }
+        .form-group {
+            margin-bottom: 15px;
+            display: flex;
+            flex-direction: column;
+        }
+        label { margin-bottom: 5px; font-weight: bold; font-size: 14px; }
+        input {
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+        .row {
+            display: flex;
+            gap: 10px;
+        }
+        .row .form-group { flex: 1; }
+        canvas {
+            border: 1px solid #ddd;
+            max-width: 100%;
+            height: auto;
+            background: #fff;
+            margin-bottom: 20px;
+        }
+        button {
+            background-color: #000;
+            color: #fff;
+            border: none;
+            padding: 12px 20px;
+            font-size: 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            width: 100%;
+            font-weight: bold;
+        }
+        button:hover { background-color: #333; }
+        .note { font-size: 12px; color: #666; margin-top: 10px; }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h2>Gerador de Assinatura - SMC</h2>
+        <form id="sigForm">
+            <div class="form-group">
+                <label>Nome Completo</label>
+                <input type="text" id="nome" placeholder="Ex: WELLINGTON DE LIMA BARRETO" required>
+            </div>
+            <div class="form-group">
+                <label>Cargo</label>
+                <input type="text" id="cargo" placeholder="Ex: ASSISTENTE ADMINISTRATIVO DE GESTÃO">
+            </div>
+            <div class="form-group">
+                <label>Setor / Coordenadoria</label>
+                <input type="text" id="setor" placeholder="Ex: Coordenadoria de Fomento e Cidadania Cultural">
+            </div>
+            <div class="form-group">
+                <label>E-mail</label>
+                <input type="email" id="email" placeholder="Ex: wellingtonbarreto@prefeitura.sp.gov.br">
+            </div>
+            
+            <div class="row">
+                <div class="form-group">
+                    <label>Rua</label>
+                    <input type="text" id="rua" placeholder="Ex: Rua Libero Badaró" value="Rua Libero Badaró">
+                </div>
+                <div class="form-group">
+                    <label>Número</label>
+                    <input type="text" id="numero" placeholder="Ex: 346/350" value="346/350">
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="form-group">
+                    <label>Andar</label>
+                    <input type="text" id="andar" placeholder="Ex: 3º Andar" value="3º Andar">
+                </div>
+                <div class="form-group">
+                    <label>Telefone (Opcional)</label>
+                    <input type="text" id="telefone" placeholder="Ex: (11) 9999-9999">
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>CEP</label>
+                <input type="text" id="cep" placeholder="Ex: 01008-905" value="01008-905">
+            </div>
+        </form>
+    </div>
+
+    <canvas id="assinaturaCanvas" width="1200" height="500"></canvas>
+    
+    <div class="container" style="padding: 0; background: transparent; box-shadow: none;">
+        <button id="downloadBtn">Baixar Imagem da Assinatura</button>
+        <p class="note">A imagem será salva no formato PNG. Adicione no Outlook ou webmail da Prefeitura.</p>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('assinaturaCanvas');
+        const ctx = canvas.getContext('2d');
+        const imgBase = new Image();
+        
+         imgBase.src = 'Assinatura.jpg'; 
+
+         const inputs = document.querySelectorAll('input');
+        inputs.forEach(input => {
+            input.addEventListener('input', drawSignature);
+        });
+
+        imgBase.onload = drawSignature;
+
+        function drawSignature() {
+             ctx.fillStyle = '#ffffff';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+             ctx.drawImage(imgBase, 0, 0, imgBase.width, imgBase.height);
+
+             const startX = 520;  
+            let startY = 60;     
+
+            ctx.fillStyle = '#000000';
+            ctx.textBaseline = 'top';
+
+             ctx.font = 'bold 28px Arial';
+            const nome = document.getElementById('nome').value.toUpperCase();
+            ctx.fillText(nome || 'NOME DO SERVIDOR', startX, startY);
+
+             startY += 35;
+            ctx.font = '24px Arial';
+            const cargo = document.getElementById('cargo').value.toUpperCase();
+            ctx.fillText(cargo || 'CARGO DO SERVIDOR', startX, startY);
+
+             startY += 32;
+            ctx.font = '24px Arial';
+            const setor = document.getElementById('setor').value;
+            ctx.fillText(setor || 'Setor ou Coordenadoria', startX, startY);
+
+             startY += 50;
+
+             ctx.font = 'bold 24px Arial';
+            ctx.fillText('SECRETARIA DE CULTURA - SMC', startX, startY);
+
+             startY += 32;
+            ctx.font = '24px Arial';
+            const email = document.getElementById('email').value;
+            ctx.fillText(email || 'email@prefeitura.sp.gov.br', startX, startY);
+
+             startY += 50;
+
+             const rua = document.getElementById('rua').value;
+            const numero = document.getElementById('numero').value;
+            const andar = document.getElementById('andar').value;
+            ctx.fillText(`${rua}, ${numero} | ${andar}`, startX, startY);
+
+             const telefone = document.getElementById('telefone').value;
+            startY += 32;
+            if (telefone.trim() !== '') {
+                ctx.fillText(telefone, startX, startY);
+                startY += 32;  
+            }
+             const cep = document.getElementById('cep').value;
+            ctx.fillText(`Centro - ${cep} | São Paulo | SP`, startX, startY);
+
+          
+            startY += 50;
+
+             ctx.font = 'bold 24px Arial';
+            ctx.fillText('https://prefeitura.sp.gov.br/cultura', startX, startY);
+        }
+
+         document.getElementById('downloadBtn').addEventListener('click', () => {
+            const link = document.createElement('a');
+            link.download = 'Assinatura_SMC.png';
+            link.href = canvas.toDataURL('image/png');
+            link.click();
+        });
+    </script>
+</body>
+</html>
